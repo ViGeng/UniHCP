@@ -160,12 +160,19 @@ def broadcast_params_multitask(model, task_grp, share_backbone_group, share_neck
 
 
 def get_rank():
+    # SLURM_PROCID is an environment variable typically defined by the Slurm job scheduler 
+    # to indicate the unique identifier of the current process or job within the cluster
+    # integer representing the rank of the current process within Slurm
+    # if SLURM_PROCID is not set, then the default value is 0
     return int(os.environ.get('SLURM_PROCID', 0))
 
 def get_local_rank():
     return get_rank() % torch.cuda.device_count()
 
 def get_world_size():
+    # SLURM_NTASKS environment variable, 
+    # which represents the total number of tasks allocated to the current job
+    # if SLURM_NTASKS is not set, then the default value is 1
     return int(os.environ.get('SLURM_NTASKS', 1))
 
 def dist_init(method='slurm', port='5671'):

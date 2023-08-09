@@ -12,14 +12,14 @@ import yaml
 import re
 
 parser = argparse.ArgumentParser(description='Multi-Task Training Framework')
-parser.add_argument('--spec_ginfo_index', type=int, required=True)
+parser.add_argument('--spec_ginfo_index', type=int, required=True) # it seems the spec_ginfo_index is the task index
 parser.add_argument('--load-path', default='', type=str)
 parser.add_argument('--ignore', nargs='+', default=[], type=str)
 parser.add_argument('--recover', action='store_true')
 parser.add_argument('--load-single', action='store_true')
 parser.add_argument('--port', default='23456', type=str)
-parser.add_argument('--config', default='', type=str)
-parser.add_argument('--test_config', default='', type=str)
+parser.add_argument('--config', default='', type=str) # the config file, both train and test
+parser.add_argument('--test_config', default='', type=str) # only test will have config, shown in batch_test.sh
 parser.add_argument('--expname', type=str, default=None, help='experiment name, output folder')
 parser.add_argument('--auto-resume', type=str, default=None, help='jobs auto resume from the pattern_path or the folder')
 parser.add_argument("--tcp_port", type=str, default="5671")

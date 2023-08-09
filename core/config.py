@@ -13,6 +13,7 @@ from .utils import printlog
 task_specific_param = ['backbone', 'neck', 'decoder', 'dataset', 'sampler', 'lr_scheduler', 'optimizer',
                        'extra', 'evaluation', 'model_entry_type', 'load_ignore', 'ckpt_task_id']
 
+# this code only enhance security and robustness comparing to yaml loader
 loader = yaml.SafeLoader
 loader.add_implicit_resolver(
     u'tag:yaml.org,2002:float',
@@ -25,6 +26,7 @@ loader.add_implicit_resolver(
     |\\.(?:nan|NaN|NAN))$''', re.X),
     list(u'-+0123456789.'))
 
+# flat a nested list to a list
 def flat(nums):
     res = []
     for i in nums:
@@ -34,9 +36,12 @@ def flat(nums):
             res.append(i)
     return res
 
+# The function specific_group_split is used to 
+# split a distributed computation environment into specific groups 
+# based on provided specifications. 
 def specific_group_split(group_spec, share_backbone_group_ids, \
                         share_neck_group_ids, share_decoder_group_ids):
-    ## sanity check
+    ## sanity check: guarentee group_spec is a list of int
     assert type(group_spec) is list
     assert all(map(lambda x: type(x) is int, group_spec))
 
@@ -46,7 +51,7 @@ def specific_group_split(group_spec, share_backbone_group_ids, \
     world_size = dist.get_world_size()
     rank = dist.get_rank()
 
-    assert world_size % splits == 0, f"{world_size} % {splits}"
+    assert world_size % splits == 0, f"{world_size} % {splits}" # if false, it prints the formatted string
     unit = int(world_size / splits)
 
     ## split
@@ -151,14 +156,19 @@ class Config(object):
         world_size = dist.get_world_size()
         rank = dist.get_rank()
 
+        # pick sub config from overall config by ginfo
+        # what does g mean by the way?
         if noginfo:
             ginfo = None
         else:  # cherrypick from tasks
             tasks = config['tasks']
             num_tasks = len(tasks)
             if spec_ginfo_index is not None:
+
                 assert spec_ginfo_index < len(tasks), \
                 'spec_ginfo_index={} is larger than num_tasks={}'.format(spec_ginfo_index, len(tasks))
+
+                # only keep specified task by ginfo_index in config var
                 tmp_config = copy.deepcopy(config)
                 config['tasks'] = dict()
                 config['tasks'][0] = tmp_config['tasks'][spec_ginfo_index]
@@ -167,6 +177,7 @@ class Config(object):
                 num_tasks = len(tasks)
 
             # parse task_common and assign to each task
+            # TODO: ???
             task_common = config.get('task_common', None)
             if task_common is not None:
                 for i in range(num_tasks):
